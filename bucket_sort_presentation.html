@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bucket Sort | DAA</title>
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--ink:#1c2333;--mut:#5d6578;--line:#e3ddd0;--teal:#0f766e;--tl:#d9f0ec;--amb:#d97706;--al:#fdecd0;--red:#b42318;--mono:Consolas,"Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+nav{position:sticky;top:0;z-index:9;background:rgba(246,243,236,.95);border-bottom:1px solid var(--line);display:flex;gap:6px;padding:10px 16px;overflow-x:auto;align-items:center}
+nav b{font:700 18px Georgia,serif;margin-right:12px;white-space:nowrap}
+nav button{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:99px;cursor:pointer;font:600 14px inherit;color:var(--mut);white-space:nowrap}
+nav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sec{display:none;max-width:1050px;margin:0 auto;padding:26px 18px 60px;animation:in .4s}
+.sec.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+h1{font:700 clamp(36px,6vw,62px)/1.05 Georgia,serif}
+h2{font:700 clamp(26px,4vw,36px)/1.15 Georgia,serif;margin-bottom:6px}
+h3{font-size:17px;margin-bottom:4px}
+.pres{color:var(--mut);font-size:14px;margin-bottom:14px}
+.pres span{border-bottom:2px dashed var(--amb);padding:0 4px;outline:0;color:var(--ink);font-weight:600}
+.lead{font-size:19px;max-width:760px;margin:12px 0 20px;color:#3a4256}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 2px 0 var(--line)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.flow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 20px}
+.flow .card{flex:1;min-width:190px}.flow i{align-self:center;font-size:26px;color:var(--amb);font-style:normal}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;font-weight:700;margin-bottom:6px}
+code{font-family:var(--mono);background:var(--al);padding:1px 6px;border-radius:5px}
+.chip{display:inline-block;min-width:44px;text-align:center;padding:6px 8px;margin:3px;border-radius:9px;background:var(--tl);border:1px solid #9fd3cb;font:700 15px var(--mono);transition:.3s}
+.chip.cur{background:var(--amb);color:#fff;border-color:var(--amb);transform:scale(1.2)}
+.chip.used{opacity:.3}
+/* buckets */
+.bks{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));margin:14px 0;align-items:end}
+.pail{position:relative;padding-top:28px}
+.pail:before{content:"";position:absolute;top:0;left:14%;width:72%;height:34px;border:4px solid #7a8499;border-bottom:0;border-radius:50px 50px 0 0}
+.pail .rim{height:13px;background:#6b7589;border-radius:8px;margin:0 -3px;position:relative;z-index:2}
+.pail .body{min-height:150px;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%);background:linear-gradient(90deg,#aab6cc,#e8edf6 45%,#a3b0c8);display:flex;flex-direction:column-reverse;align-items:center;padding:4px 0 8px;gap:2px;transition:.3s}
+.pail.hot .body{background:linear-gradient(90deg,#f1b866,#fde7c4 45%,#eaa44c)}
+.pail .lab{text-align:center;font:700 14px var(--mono);margin-top:4px}.pail .lab small{display:block;font:12px var(--mono);color:var(--mut)}
+.ball{width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f59e0b,#c2620a);color:#fff;font:700 13px var(--mono);display:grid;place-items:center;box-shadow:0 2px 3px rgba(0,0,0,.25)}
+.ball.new{animation:drop .7s cubic-bezier(.3,1.3,.5,1)}
+.ball.out{background:radial-gradient(circle at 30% 30%,#2a7f77,#0b4a44);display:inline-grid;margin:3px}
+@keyframes drop{from{transform:translateY(-200px) scale(1.5);opacity:.1}}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.ctl input,.ctl select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:14px var(--mono)}
+.btn{border:0;background:var(--teal);color:#fff;padding:9px 16px;border-radius:9px;font:600 14px inherit;cursor:pointer}
+.btn.g{background:var(--ink)}.btn.w{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.ph{display:flex;gap:6px;margin:8px 0}.ph span{flex:1;text-align:center;padding:6px;border-radius:8px;background:var(--line);font-weight:600;font-size:14px;color:var(--mut)}
+.ph span.on{background:var(--teal);color:#fff}
+.msg{background:var(--ink);color:#fff;padding:12px 16px;border-radius:12px;font:15px var(--mono);min-height:48px}
+.code{background:#1c2333;color:#e8e4d8;border-radius:14px;padding:14px 0;font:16px/2 var(--mono);overflow-x:auto}
+.code div{padding:0 18px;border-left:4px solid transparent;white-space:pre}
+.code div.on{background:#2c3550;border-color:var(--amb);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:16px}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}
+th{background:var(--ink);color:#fff;font-size:13px;text-transform:uppercase}
+tr.t td{background:var(--tl);font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:4px;height:100px;border-bottom:3px solid var(--ink);margin:12px 0 6px}
+.bars div{flex:1;border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.bars div b{position:absolute;top:-18px;width:100%;text-align:center;font-size:12px}
+.big{font:700 32px Georgia,serif}
+.g1{color:var(--teal)}.g2{color:var(--amb)}.g3{color:var(--red)}
+.step{border-left:4px solid var(--teal);padding:4px 0 4px 14px;margin:10px 0}
+.mt{margin-top:18px}
+.mem{text-align:center}.mem-g{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.tag{display:inline-block;background:var(--al);color:#8a4b00;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:700;margin-bottom:8px}
+.intro{text-align:center}.intro .cap{font-weight:700;margin-bottom:4px}.intro .arr{margin:10px 0;color:var(--amb);font-weight:700;font-size:17px}
+.intro .stage{animation:in .8s both}.intro .stage:nth-child(3){animation-delay:.25s}.intro .stage:nth-child(5){animation-delay:.5s}
+.intro .ball.out{margin:3px 5px}
+@media(max-width:600px){.flow i{display:none}}
+</style></head><body>
+<nav><b>🪣 Bucket Sort</b>
+<button class="on">1 Introduction</button><button>2 Algorithm</button><button>3 Working Example</button><button>4 Frequency Count</button><button>5 Complexity</button></nav>
+
+<!-- 1 -->
+<section class="sec on">
+<div class="pres">Presenter: <span contenteditable>Dia Sabawon</span> · DAA – Design &amp; Analysis of Algorithms</div>
+<span class="tag">Sorting Algorithm</span>
+<h1>Bucket Sort</h1>
+<h3 style="margin-top:14px">👥 Presented by</h3>
+<div class="grid mem-g"><div class="card mem"><span class="num">1</span><h3>Bazela</h3><code>B23110006020</code></div><div class="card mem"><span class="num">2</span><h3>Dia Sabawon</h3><code>B23110006024</code></div><div class="card mem"><span class="num">3</span><h3>Ifrah Inayet khan</h3><code>B23110006047</code></div><div class="card mem"><span class="num">4</span><h3>M. Abdullah</h3><code>B23110006076</code></div><div class="card mem"><span class="num">5</span><h3>Tooba Shafiq</h3><code>B23110006173</code></div></div>
+<p class="lead"><b>Definition:</b> Bucket Sort sorts numbers by <b>distributing</b> them into buckets by value, sorting inside each bucket, then <b>joining</b> the buckets together in order.</p>
+<div class="card" style="background:var(--al);border-color:#f0cf9a"><h3>🧺 Real-life idea</h3>Think of sorting exam papers by marks: make piles for 0–25, 26–50, 51–75 and 76–100, tidy each pile, then stack the piles from lowest to highest.</div>
+<h3 class="mt">The whole idea in one picture</h3>
+<div class="card intro">
+<div class="stage"><div class="cap"><span class="num">1</span> Unsorted numbers</div><div id="i1"></div></div>
+<div class="arr">⬇ Distribute into buckets by range</div>
+<div class="stage"><div class="cap"><span class="num">2</span> Buckets (sorted inside)</div><div id="i2"></div></div>
+<div class="arr">⬇ Join the buckets together, left to right</div>
+<div class="stage"><div class="cap"><span class="num">3</span> Sorted numbers</div><div id="i3"></div></div>
+</div>
+<div class="grid mt">
+<div class="card"><h3>✅ Fast when</h3>Numbers are spread evenly.</div>
+<div class="card"><h3>⚠️ Slow when</h3>Most numbers land in one bucket.</div>
+<div class="card"><h3>🔢 In this project</h3>Whole numbers from 0 to 99.</div></div>
+</section>
+
+<!-- 2 -->
+<section class="sec">
+<div class="pres">Presenter: <span contenteditable>Bazela</span></div>
+<h2>Algorithm &amp; Pseudocode</h2>
+<p class="lead">For whole numbers from 0 to 99. Press <b>Next</b> to go line by line.</p>
+<div class="code" id="code"></div>
+<div class="ctl"><button class="btn w" onclick="cs(-1)">← Prev</button><button class="btn" onclick="cs(1)">Next →</button><span class="msg" id="cm" style="flex:1"></span></div>
+<div class="card mt"><h3>Which bucket?</h3>Each bucket covers a range. With k = 5 buckets, width = 100 ÷ 5 = 20, so bucket = <code>⌊x ÷ 20⌋</code>. Example: 39 ÷ 20 = 1.95 → ⌊1.95⌋ = 1 → B[1].</div>
+</section>
+
+<!-- 3 -->
+<section class="sec">
+<div class="pres">Presenter: <span contenteditable>Tooba Shafiq</span></div>
+<h2>Working Example</h2>
+<div class="ctl"><input id="inp" size="40" value="78 17 39 26 72 94 21 12 23 68">
+<label>Buckets <select id="kk"><option>4</option><option selected>5</option><option>10</option></select></label>
+<button class="btn g" onclick="build()">Load</button></div>
+<div style="color:var(--mut);font-size:14px">Use whole numbers from 0 to 99 (max 12 numbers).</div>
+<div class="ph" id="ph"><span>1 Distribute</span><span>2 Sort each bucket</span><span>3 Combine</span></div>
+<div class="card"><b>Input</b><div id="ia"></div><div id="bks"></div><b>Sorted output</b><div id="oa" style="min-height:44px"></div></div>
+<div class="msg mt" id="em"></div>
+<div class="ctl"><button class="btn w" onclick="go(-1)">← Back</button><button class="btn" onclick="go(1)">Step →</button><button class="btn g" id="ap" onclick="auto()">▶ Auto-play</button><button class="btn w" onclick="reset()">↺ Reset</button></div>
+</section>
+
+<!-- 4 -->
+<section class="sec">
+<div class="pres">Presenter: <span contenteditable>Ifrah Inayet khan</span></div>
+<h2>Frequency Count Table</h2>
+<p class="lead">How many times each step runs. n = numbers, k = buckets. The last column uses your Working Example.</p>
+<div class="card" style="overflow-x:auto"><table id="ft"></table></div>
+<div class="card mt" id="fsum"></div>
+</section>
+
+<!-- 5 -->
+<section class="sec">
+<div class="pres">Presenter: <span contenteditable>M. Abdullah</span></div>
+<h2>Time &amp; Space Complexity</h2>
+<div class="step"><b>Step 1.</b> Create k buckets → <code>k</code></div>
+<div class="step"><b>Step 2.</b> Put n numbers in buckets → <code>n</code></div>
+<div class="step"><b>Step 3.</b> Sort each bucket → small buckets are cheap, big buckets are expensive</div>
+<div class="step"><b>Step 4.</b> Join the buckets → <code>n + k</code></div>
+<h3 class="mt">The three cases (8 numbers, 8 buckets)</h3>
+<div class="grid">
+<div class="card"><div class="big g1">Best: O(n + k)</div><div class="bars" id="b1"></div>1 number per bucket. Nothing to sort.</div>
+<div class="card"><div class="big g2">Average: O(n + k)</div><div class="bars" id="b2"></div>Spread evenly. Buckets stay small.</div>
+<div class="card"><div class="big g3">Worst: O(n²)</div><div class="bars" id="b3"></div>All numbers in one bucket. Insertion Sort is slow.</div></div>
+<h3 class="mt">📈 Growth graph: steps vs number of items (n)</h3>
+<div class="card"><div id="gr"></div>
+<div class="ctl">Move n: <input type="range" id="gn" min="1" max="20" value="10" oninput="graph()" style="flex:1;min-width:160px"><b id="gv"></b></div>
+<div id="gt"></div></div>
+<div class="card mt"><h3>Space: O(n + k)</h3>Extra memory for k buckets and n numbers.</div>
+<h2 class="mt">Key Takeaways</h2>
+<div class="grid"><div class="card"><div class="big g1">O(n)</div>Usual time, evenly spread numbers</div><div class="card"><div class="big g3">O(n²)</div>Worst time, one crowded bucket</div><div class="card"><div class="big g2">O(n + k)</div>Extra space</div></div>
+<p class="lead" style="text-align:center;margin-top:22px"><b>Distribute → Sort → Combine.</b> Thank you. Questions?<br><small style="font-size:14px;color:var(--mut)">Bazela · Dia Sabawon · Ifrah Inayet khan · M. Abdullah · Tooba Shafiq</small></p>
+</section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let cur=0;const bt=$$('nav button'),sc=$$('.sec');
+function show(i){cur=i;bt.forEach((b,j)=>b.classList.toggle('on',i==j));sc.forEach((s,j)=>s.classList.toggle('on',i==j));scrollTo(0,0);if(i==3)freq();if(i==4){bars();graph()}}
+bt.forEach((b,i)=>b.onclick=()=>show(i));
+onkeydown=e=>{if(e.target.matches('input,select,[contenteditable]'))return;if(e.key=='ArrowRight'&&cur<4)show(cur+1);if(e.key=='ArrowLeft'&&cur>0)show(cur-1)};
+
+/* bucket drawing */
+function pails(B,w,h,nw){return '<div class="bks">'+B.map((b,j)=>`<div class="pail ${j==h?'hot':''}"><div class="rim"></div><div class="body">${b.map((x,i)=>`<span class="ball ${j==h&&nw&&i==b.length-1?'new':''}">${x}</span>`).join('')}</div><div class="lab">B[${j}]<small>${j*w}–${j*w+w-1}</small></div></div>`).join('')+'</div>'}
+
+/* intro picture */
+$('#i1').innerHTML=[45,12,78,33,91,5].map(x=>`<span class="chip">${x}</span>`).join('');
+$('#i2').innerHTML=pails([[5,12],[33,45],[],[78,91]],25,-1,0);
+$('#i3').innerHTML=[5,12,33,45,78,91].map(x=>`<span class="ball out">${x}</span>`).join('');
+
+/* pseudocode */
+const L=[['BUCKET-SORT(A, k)','A has whole numbers from 0 to 99.'],
+['  width ← 100 ÷ k','Each bucket covers "width" values.'],
+['  create k empty buckets B[0 … k-1]','Start with empty buckets.'],
+['  for each x in A:\n      put x into B[⌊x ÷ width⌋]','Distribute: drop each number in its bucket.'],
+['  for each bucket B[i]:\n      Insertion-Sort(B[i])','Sort inside every bucket.'],
+['  join B[0], B[1], … B[k-1] into A','Combine: read the buckets in order.'],
+['  return A','A is sorted.']];
+let ci=0;function cs(d){ci=Math.max(0,Math.min(L.length-1,ci+d));rc()}
+function rc(){$('#code').innerHTML=L.map((l,i)=>`<div class="${i==ci?'on':''}">${l[0]}</div>`).join('');$('#cm').textContent=L[ci][1]}rc();
+
+/* working example */
+let F=[],fi=0,tm=null,A=[],W=20,fwd=0;window.EX={n:0,k:0,sz:[]};
+const cp=B=>B.map(b=>[...b]);
+function build(){stop();A=$('#inp').value.trim().split(/[\s,]+/).map(Number).filter(x=>Number.isInteger(x)&&x>=0&&x<=99).slice(0,12);
+if(!A.length){$('#em').textContent='Enter whole numbers from 0 to 99.';return}
+const k=+$('#kk').value;W=100/k;const n=A.length;let B=Array.from({length:k},()=>[]),out=[];
+F=[{m:`n = ${n} numbers, k = ${k} buckets, width = 100 ÷ ${k} = ${W}`,B:cp(B),o:[],c:-1,h:-1,p:0}];
+A.forEach((x,i)=>{const j=Math.floor(x/W);B[j].push(x);F.push({m:`${x} ÷ ${W} = ${(x/W).toFixed(2)} → ⌊ ⌋ = ${j} → B[${j}]`,B:cp(B),o:[],c:i,h:j,p:0,nw:1})});
+const sz=B.map(b=>b.length);window.EX={n,k,sz};
+F.push({m:'Buckets with 0 or 1 number are already sorted.',B:cp(B),o:[],c:-1,h:-1,p:1});
+B.forEach((b,j)=>{if(b.length>1){b.sort((x,y)=>x-y);F.push({m:`Sort B[${j}] → ${b.join(', ')}`,B:cp(B),o:[],c:-1,h:j,p:1})}});
+B.forEach((b,j)=>{if(b.length){out=out.concat(b);F.push({m:`Join B[${j}] → output (${out.length} of ${n})`,B:cp(B),o:[...out],c:-1,h:j,p:2})}});
+F.push({m:'✅ Sorted: '+out.join(', '),B:cp(B),o:[...out],c:-1,h:-1,p:2});
+fi=0;fwd=0;draw()}
+function draw(){const f=F[fi];
+$('#ia').innerHTML=A.map((x,i)=>`<span class="chip ${i==f.c?'cur':(f.p>0||i<f.c)?'used':''}">${x}</span>`).join('');
+$('#bks').innerHTML=pails(f.B,W,f.h,fwd&&f.nw);
+$('#oa').innerHTML=f.o.map(x=>`<span class="ball out">${x}</span>`).join('');
+$('#em').textContent=f.m;$$('#ph span').forEach((s,i)=>s.classList.toggle('on',i==f.p))}
+function go(d){fwd=d>0;fi=Math.max(0,Math.min(F.length-1,fi+d));draw();if(fi==F.length-1)stop()}
+function stop(){clearInterval(tm);tm=null;$('#ap').textContent='▶ Auto-play'}
+function auto(){if(tm)return stop();if(fi==F.length-1)fi=0;$('#ap').textContent='⏸ Pause';tm=setInterval(()=>go(1),1000)}
+function reset(){stop();fwd=0;fi=0;draw()}
+build();
+
+/* frequency */
+function freq(){const{n,k,sz}=EX,s=sz.reduce((t,x)=>t+x*x,0);
+const R=[['Create k buckets','k',k],['Put each number in its bucket','n',n],['Sort each bucket (worst-case)','Σ size²',s],['Join buckets: visit k, copy n','n + k',n+k]];
+const T=R.reduce((t,r)=>t+r[2],0);
+$('#ft').innerHTML=`<tr><th>Step</th><th>Times</th><th>Your example (n=${n}, k=${k})</th></tr>`+R.map(r=>`<tr><td>${r[0]}</td><td><code>${r[1]}</code></td><td>${r[2]}</td></tr>`).join('')+`<tr class="t"><td>Total</td><td><code>2n + 2k + Σ size²</code></td><td>${T}</td></tr>`;
+$('#fsum').innerHTML=`<h3>Reading the table</h3>Bucket sizes in your example: <code>${sz.join(', ')}</code>, so Σ size² = ${sz.map(x=>x+'²').join(' + ')} = <b>${s}</b>.<br>The first, second and fourth rows are always small (n or k). Only the sorting row can grow, up to <b>n²</b> when all numbers are in one bucket.`}
+
+/* bars */
+function bars(){[['b1',[1,1,1,1,1,1,1,1],'#0f766e'],['b2',[2,0,1,2,1,0,2,0],'#d97706'],['b3',[0,0,0,8,0,0,0,0],'#b42318']].forEach(([id,d,c])=>{$('#'+id).innerHTML=d.map(v=>`<div style="height:${v/8*100}%;background:${c}"><b>${v||''}</b></div>`).join('')})}
+bars();
+/* growth graph */
+function graph(){const n=+$('#gn').value,W=600,H=300,L=50,B=34,T=14,R=14,M=20,Y0=400;
+const X=v=>L+v/M*(W-L-R),Y=v=>H-B-v/Y0*(H-B-T);
+let g='';for(let v=0;v<=400;v+=100)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e3ddd0"/><text x="${L-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="#5d6578">${v}</text>`;
+for(let v=0;v<=20;v+=5)g+=`<text x="${X(v)}" y="${H-B+18}" text-anchor="middle" font-size="12" fill="#5d6578">${v}</text>`;
+let w='',l='';for(let v=0;v<=20;v+=.5){w+=(v?'L':'M')+X(v)+' '+Y(v*v)+' ';l+=(v?'L':'M')+X(v)+' '+Y(v)+' '}
+g+=`<line x1="${L}" x2="${L}" y1="${T}" y2="${H-B}" stroke="#1c2333" stroke-width="2"/><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#1c2333" stroke-width="2"/>`;
+g+=`<path d="${w}" fill="none" stroke="#b42318" stroke-width="3"/><path d="${l}" fill="none" stroke="#0f766e" stroke-width="3"/>`;
+g+=`<line x1="${X(n)}" x2="${X(n)}" y1="${T}" y2="${H-B}" stroke="#d97706" stroke-dasharray="4"/><circle cx="${X(n)}" cy="${Y(n)}" r="6" fill="#0f766e"/><circle cx="${X(n)}" cy="${Y(n*n)}" r="6" fill="#b42318"/>`;
+g+=`<text x="${X(14.2)}" y="${Y(14.2*14.2)-8}" font-size="13" font-weight="700" fill="#b42318">Worst: n²</text><text x="${X(14)}" y="${Y(14)-10}" font-size="13" font-weight="700" fill="#0f766e">Best / Average: n</text>`;
+g+=`<text x="${(L+W)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="#5d6578">n (number of items)</text><text x="12" y="${H/2}" font-size="12" fill="#5d6578" transform="rotate(-90 12 ${H/2})">steps</text>`;
+$('#gr').innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:640px;display:block;margin:auto">${g}</svg>`;
+$('#gv').textContent='n = '+n;
+$('#gt').innerHTML=`At n = ${n}: best/average ≈ <b class="g1">${n}</b> steps, worst ≈ <b class="g3">${n*n}</b> steps. The gap grows fast as n grows.`}
+graph();
+</script></body></html>
